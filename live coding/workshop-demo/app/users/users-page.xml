@@ -1,0 +1,21 @@
+<Page navigatingTo="onNavigatingTo" xmlns="http://schemas.nativescript.org/tns.xsd">
+    <!--
+    <ActionBar title="Users" flat="true" />
+    <GridLayout>
+        <ActivityIndicator busy="{{ isLoading }}"
+                           visibility="{{ isLoading ? 'visible' : 'collapsed' }}" />
+        <Label text="{{ errorMessage }}"
+               visibility="{{ hasError ? 'visible' : 'collapsed' }}"
+               class="error-label" />
+        <ListView items="{{ users }}" visibility="{{ !isLoading ? 'visible' : 'collapsed' }}">
+            <ListView.itemTemplate>
+                <StackLayout class="user-item">
+                    <Label text="{{ name }}" class="user-name" />
+                    <Label text="{{ email }}" class="user-email" />
+                    <Label text="{{ phone }}" class="user-phone" />
+                </StackLayout>
+            </ListView.itemTemplate>
+        </ListView>
+    </GridLayout>
+    -->
+</Page>

@@ -1,0 +1,35 @@
+@import '@nativescript/theme/css/core.css';
+@import '@nativescript/theme/css/default.css';
+
+/*
+.user-item {
+    padding: 12 16;
+    border-bottom-width: 1;
+    border-bottom-color: #E0E0E0;
+}
+
+.user-name {
+    font-size: 16;
+    font-weight: bold;
+    color: #1A1A1A;
+}
+
+.user-email {
+    font-size: 13;
+    color: #757575;
+    margin-top: 2;
+}
+
+.user-phone {
+    font-size: 13;
+    color: #757575;
+    margin-top: 2;
+}
+
+.error-label {
+    font-size: 14;
+    color: #E53935;
+    text-align: center;
+    margin: 20;
+}
+*/
