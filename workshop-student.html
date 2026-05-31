@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NativeScript Workshop</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    line-height: 1.6;
+  }
+
+  header {
+    background: #1a1d27;
+    border-bottom: 1px solid #2d3148;
+    padding: 20px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  header h1 { font-size: 17px; font-weight: 600; color: #fff; }
+  header span { font-size: 13px; color: #64748b; }
+
+  .progress-bar { height: 3px; background: #1e2235; position: sticky; top: 61px; z-index: 99; }
+  .progress-fill { height: 100%; background: #4ade80; transition: width 0.3s; width: 0%; }
+
+  main { max-width: 720px; margin: 0 auto; padding: 40px 32px; }
+
+  .intro {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 32px;
+  }
+
+  .intro h2 { font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .intro p { font-size: 14px; color: #94a3b8; }
+
+  .chips { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .chip {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid #2d3148;
+    color: #64748b;
+  }
+  .chip.green { border-color: #166534; color: #4ade80; background: #0f2a1a; }
+
+  .step {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .step.active { border-color: #4ade80; }
+  .step.done { border-color: #1e4d2e; opacity: 0.65; }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 22px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: #252836;
+    border: 1px solid #3d4166;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: #94a3b8;
+    flex-shrink: 0;
+  }
+
+  .step.active .num { background: #14532d; border-color: #4ade80; color: #4ade80; }
+  .step.done .num { background: #14532d; border-color: #22c55e; color: #22c55e; }
+
+  .step-info { flex: 1; }
+  .step-title { font-size: 15px; font-weight: 600; color: #e2e8f0; }
+  .step-file { font-size: 12px; color: #60a5fa; font-family: monospace; margin-top: 2px; }
+
+  .t-badge {
+    font-size: 11px; padding: 3px 8px; border-radius: 4px;
+    background: #1e2235; color: #64748b; border: 1px solid #2d3148;
+  }
+
+  .chevron { color: #475569; font-size: 18px; transition: transform 0.2s; }
+
+  .step-body { display: none; border-top: 1px solid #2d3148; }
+  .step-body.open { display: block; }
+
+  .block { padding: 18px 22px; border-bottom: 1px solid #1e2235; }
+  .block:last-of-type { border-bottom: none; }
+
+  .block-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.7px; color: #475569; margin-bottom: 8px;
+  }
+
+  .cmd {
+    background: #0d1117;
+    border: 1px solid #2d3148;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #4ade80;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .cmd:hover { border-color: #4ade80; }
+  .cmd::before { content: '$'; color: #475569; font-weight: 700; }
+
+  .cmd-copy {
+    margin-left: auto;
+    font-size: 11px;
+    color: #475569;
+    background: #1e2235;
+    border: 1px solid #2d3148;
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: sans-serif;
+  }
+
+  .code {
+    background: #0d1117;
+    border: 1px solid #2d3148;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 12px;
+    color: #e2e8f0;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.65;
+  }
+
+  .code .c { color: #475569; }
+  .code .k { color: #c084fc; }
+  .code .s { color: #86efac; }
+  .code .t { color: #67e8f9; }
+  .code .f { color: #fbbf24; }
+  .code .n { color: #fb923c; }
+
+  .note {
+    background: #1e1b4b;
+    border-left: 3px solid #6d28d9;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #c4b5fd;
+    line-height: 1.5;
+  }
+
+  .warn {
+    background: #1c1a0a;
+    border-left: 3px solid #854d0e;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #fcd34d;
+    line-height: 1.5;
+  }
+
+  .file-tree {
+    background: #0d1117;
+    border: 1px solid #2d3148;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.8;
+  }
+
+  .file-tree .hi { color: #4ade80; }
+  .file-tree .dim { color: #374151; }
+
+  .actions {
+    padding: 14px 22px;
+    display: flex;
+    gap: 8px;
+    background: #141720;
+  }
+
+  button {
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s;
+  }
+
+  button:hover { opacity: 0.85; }
+
+  .btn-ok { background: #14532d; color: #4ade80; border: 1px solid #166534; }
+  .btn-next { background: #4ade80; color: #052e16; }
+  .btn-reset { background: transparent; color: #475569; border: 1px solid #2d3148; margin-left: auto; }
+
+  .final {
+    background: #0f2a1a;
+    border: 1px solid #166534;
+    border-radius: 10px;
+    padding: 24px;
+    margin-top: 24px;
+    text-align: center;
+    display: none;
+  }
+
+  .final h3 { font-size: 18px; color: #4ade80; margin-bottom: 6px; }
+  .final p { font-size: 14px; color: #86efac; }
+
+  .copied { color: #4ade80 !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NativeScript Workshop</h1>
+  <span id="prog-txt">0 / 7 pasos</span>
+</header>
+<div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+
+<main>
+
+  <div class="intro">
+    <h2>App de usuarios con NativeScript + MVVM</h2>
+    <p>Descargue el proyecto base, siga cada paso en orden y agregue el código indicado en cada archivo. Al final tendrá una app funcionando que consume una API real.</p>
+    <div class="chips">
+      <span class="chip green">NativeScript + TypeScript</span>
+      <span class="chip">API: jsonplaceholder.typicode.com</span>
+      <span class="chip">~25 min</span>
+    </div>
+  </div>
+
+  <!-- PASO 0 -->
+  <div class="step active" id="s0">
+    <div class="step-header" onclick="toggle(0)">
+      <div class="num">0</div>
+      <div class="step-info">
+        <div class="step-title">Clonar el proyecto base</div>
+        <div class="step-file">Terminal</div>
+      </div>
+      <span class="t-badge">~3 min</span>
+      <span class="chevron" id="ch0" style="transform:rotate(90deg)">›</span>
+    </div>
+    <div class="step-body open" id="b0">
+      <div class="block">
+        <div class="block-label">1. Clone el repositorio</div>
+        <div class="cmd" onclick="copyCmd(this, 'git clone https://github.com/Carranza506/LiveCoding.git')">
+          git clone git clone https://github.com/Carranza506/LiveCoding.git
+          <span class="cmd-copy">copiar</span>
+        </div>
+      </div>
+      <div class="block">
+        <div class="block-label">2. Entre a la carpeta</div>
+        <div class="cmd" onclick="copyCmd(this, 'cd workshop-demo')">
+          cd workshop-demo
+          <span class="cmd-copy">copiar</span>
+        </div>
+      </div>
+      <div class="block">
+        <div class="block-label">3. Instale dependencias</div>
+        <div class="cmd" onclick="copyCmd(this, 'npm install')">
+          npm install
+          <span class="cmd-copy">copiar</span>
+        </div>
+      </div>
+      <div class="block">
+        <div class="block-label">4. Ábralo en VS Code</div>
+        <div class="cmd" onclick="copyCmd(this, 'code .')">
+          code .
+          <span class="cmd-copy">copiar</span>
+        </div>
+      </div>
+      <div class="block">
+        <div class="block-label">Estructura del proyecto</div>
+        <div class="file-tree">app/
+├── models/
+│   └── <span class="hi">user.model.ts</span>        <span class="dim">← completar en paso 1</span>
+├── services/
+│   └── <span class="hi">user.service.ts</span>      <span class="dim">← completar en paso 2</span>
+├── users/
+│   ├── <span class="hi">users-view-model.ts</span>  <span class="dim">← completar en paso 3</span>
+│   ├── <span class="hi">users-page.ts</span>        <span class="dim">← completar en paso 4</span>
+│   └── <span class="hi">users-page.xml</span>       <span class="dim">← completar en paso 5</span>
+├── home/                    <span class="dim">← pantalla base (no modificar)</span>
+├── app-root.xml             <span class="dim">← actualizar en paso 6</span>
+└── app.css</div>
+      </div>
+      <div class="block">
+        <div class="block-label">Nota</div>
+        <div class="note">Los archivos ya existen en el proyecto pero están vacíos o con el código comentado. Usted los va completando paso a paso.</div>
+      </div>
+      <div class="actions">
+        <button class="btn-ok" onclick="done(0)">✓ Listo</button>
+        <button class="btn-next" onclick="next(0)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 1 -->
+  <div class="step" id="s1">
+    <div class="step-header" onclick="toggle(1)">
+      <div class="num">1</div>
+      <div class="step-info">
+        <div class="step-title">Modelo de datos</div>
+        <div class="step-file">app/models/user.model.ts</div>
+      </div>
+      <span class="t-badge">~3 min</span>
+      <span class="chevron" id="ch1">›</span>
+    </div>
+    <div class="step-body" id="b1">
+      <div class="block">
+        <div class="block-label">Abra <code style="color:#60a5fa">app/models/user.model.ts</code> y reemplace con:</div>
+        <div class="code"><span class="k">export interface</span> <span class="t">User</span> {
+    id: <span class="t">number</span>;
+    name: <span class="t">string</span>;
+    email: <span class="t">string</span>;
+    phone: <span class="t">string</span>;
+}</div>
+      </div>
+      <div class="actions">
+        <button class="btn-ok" onclick="done(1)">✓ Listo</button>
+        <button class="btn-next" onclick="next(1)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 2 -->
+  <div class="step" id="s2">
+    <div class="step-header" onclick="toggle(2)">
+      <div class="num">2</div>
+      <div class="step-info">
+        <div class="step-title">Servicio HTTP</div>
+        <div class="step-file">app/services/user.service.ts</div>
+      </div>
+      <span class="t-badge">~4 min</span>
+      <span class="chevron" id="ch2">›</span>
+    </div>
+    <div class="step-body" id="b2">
+      <div class="block">
+        <div class="block-label">Abra <code style="color:#60a5fa">app/services/user.service.ts</code> y reemplace con:</div>
+        <div class="code"><span class="k">import</span> { Http } <span class="k">from</span> <span class="s">'@nativescript/core'</span>;
+<span class="k">import</span> { <span class="t">User</span> } <span class="k">from</span> <span class="s">'../models/user.model'</span>;
+
+<span class="k">const</span> BASE_URL = <span class="s">'https://jsonplaceholder.typicode.com'</span>;
+
+<span class="k">export class</span> <span class="t">UserService</span> {
+    <span class="k">async</span> <span class="f">getUsers</span>(): <span class="t">Promise</span>&lt;<span class="t">User</span>[]&gt; {
+        <span class="k">const</span> response = <span class="k">await</span> Http.<span class="f">request</span>({
+            url: <span class="s">`${BASE_URL}/users`</span>,
+            method: <span class="s">'GET'</span>,
+        });
+
+        <span class="k">if</span> (response.statusCode !== <span class="n">200</span>) {
+            <span class="k">throw new</span> <span class="f">Error</span>(<span class="s">'Failed to fetch users.'</span>);
+        }
+
+        <span class="k">return</span> response.content.<span class="f">toJSON</span>() <span class="k">as</span> <span class="t">User</span>[];
+    }
+}</div>
+      </div>
+      <div class="block">
+        <div class="block-label">Importante</div>
+        <div class="note">En NativeScript no existe <code>fetch</code>. Se usa <code>Http</code> de <code>@nativescript/core</code> para hacer peticiones HTTP nativas.</div>
+      </div>
+      <div class="actions">
+        <button class="btn-ok" onclick="done(2)">✓ Listo</button>
+        <button class="btn-next" onclick="next(2)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 3 -->
+  <div class="step" id="s3">
+    <div class="step-header" onclick="toggle(3)">
+      <div class="num">3</div>
+      <div class="step-info">
+        <div class="step-title">ViewModel</div>
+        <div class="step-file">app/users/users-view-model.ts</div>
+      </div>
+      <span class="t-badge">~5 min</span>
+      <span class="chevron" id="ch3">›</span>
+    </div>
+    <div class="step-body" id="b3">
+      <div class="block">
+        <div class="block-label">Abra <code style="color:#60a5fa">app/users/users-view-model.ts</code> y reemplace con:</div>
+        <div class="code"><span class="k">import</span> { Observable } <span class="k">from</span> <span class="s">'@nativescript/core'</span>;
+<span class="k">import</span> { <span class="t">User</span> } <span class="k">from</span> <span class="s">'../models/user.model'</span>;
+<span class="k">import</span> { <span class="t">UserService</span> } <span class="k">from</span> <span class="s">'../services/user.service'</span>;
+
+<span class="k">export class</span> <span class="t">UsersViewModel</span> <span class="k">extends</span> <span class="t">Observable</span> {
+    <span class="k">private</span> _users: <span class="t">User</span>[] = [];
+    <span class="k">private</span> _isLoading: <span class="t">boolean</span> = <span class="k">false</span>;
+    <span class="k">private</span> _errorMessage: <span class="t">string</span> = <span class="s">''</span>;
+    <span class="k">private</span> userService = <span class="k">new</span> <span class="t">UserService</span>();
+
+    <span class="k">get</span> <span class="f">users</span>(): <span class="t">User</span>[] { <span class="k">return</span> <span class="k">this</span>._users; }
+    <span class="k">set</span> <span class="f">users</span>(value: <span class="t">User</span>[]) {
+        <span class="k">this</span>._users = value;
+        <span class="k">this</span>.<span class="f">notifyPropertyChange</span>(<span class="s">'users'</span>, value);
+    }
+
+    <span class="k">get</span> <span class="f">isLoading</span>(): <span class="t">boolean</span> { <span class="k">return</span> <span class="k">this</span>._isLoading; }
+    <span class="k">set</span> <span class="f">isLoading</span>(value: <span class="t">boolean</span>) {
+        <span class="k">if</span> (<span class="k">this</span>._isLoading !== value) {
+            <span class="k">this</span>._isLoading = value;
+            <span class="k">this</span>.<span class="f">notifyPropertyChange</span>(<span class="s">'isLoading'</span>, value);
+        }
+    }
+
+    <span class="k">get</span> <span class="f">errorMessage</span>(): <span class="t">string</span> { <span class="k">return</span> <span class="k">this</span>._errorMessage; }
+    <span class="k">set</span> <span class="f">errorMessage</span>(value: <span class="t">string</span>) {
+        <span class="k">this</span>._errorMessage = value;
+        <span class="k">this</span>.<span class="f">notifyPropertyChange</span>(<span class="s">'errorMessage'</span>, value);
+        <span class="k">this</span>.<span class="f">notifyPropertyChange</span>(<span class="s">'hasError'</span>, value !== <span class="s">''</span>);
+    }
+
+    <span class="k">get</span> <span class="f">hasError</span>(): <span class="t">boolean</span> { <span class="k">return</span> <span class="k">this</span>._errorMessage !== <span class="s">''</span>; }
+
+    <span class="f">constructor</span>() {
+        <span class="k">super</span>();
+        <span class="k">this</span>.<span class="f">loadUsers</span>();
+    }
+
+    <span class="k">async</span> <span class="f">loadUsers</span>(): <span class="t">Promise</span>&lt;<span class="t">void</span>&gt; {
+        <span class="k">this</span>.isLoading = <span class="k">true</span>;
+        <span class="k">this</span>.errorMessage = <span class="s">''</span>;
+        <span class="k">try</span> {
+            <span class="k">this</span>.users = <span class="k">await</span> <span class="k">this</span>.userService.<span class="f">getUsers</span>();
+        } <span class="k">catch</span> (error: <span class="t">any</span>) {
+            <span class="k">this</span>.errorMessage = error.message || <span class="s">'Failed to load users.'</span>;
+        } <span class="k">finally</span> {
+            <span class="k">this</span>.isLoading = <span class="k">false</span>;
+        }
+    }
+}</div>
+      </div>
+      <div class="block">
+        <div class="block-label">Importante</div>
+        <div class="note">Cada propiedad necesita <code>notifyPropertyChange</code> en el setter. Sin eso, la Vista no se actualiza aunque el dato cambie en memoria.</div>
+      </div>
+      <div class="actions">
+        <button class="btn-ok" onclick="done(3)">✓ Listo</button>
+        <button class="btn-next" onclick="next(3)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 4 -->
+  <div class="step" id="s4">
+    <div class="step-header" onclick="toggle(4)">
+      <div class="num">4</div>
+      <div class="step-info">
+        <div class="step-title">Code-behind</div>
+        <div class="step-file">app/users/users-page.ts</div>
+      </div>
+      <span class="t-badge">~2 min</span>
+      <span class="chevron" id="ch4">›</span>
+    </div>
+    <div class="step-body" id="b4">
+      <div class="block">
+        <div class="block-label">Abra <code style="color:#60a5fa">app/users/users-page.ts</code> y reemplace con:</div>
+        <div class="code"><span class="k">import</span> { <span class="t">EventData</span>, <span class="t">Page</span> } <span class="k">from</span> <span class="s">'@nativescript/core'</span>;
+<span class="k">import</span> { <span class="t">UsersViewModel</span> } <span class="k">from</span> <span class="s">'./users-view-model'</span>;
+
+<span class="k">export function</span> <span class="f">onNavigatingTo</span>(args: <span class="t">EventData</span>): <span class="t">void</span> {
+    <span class="k">const</span> page = args.object <span class="k">as</span> <span class="t">Page</span>;
+    page.bindingContext = <span class="k">new</span> <span class="t">UsersViewModel</span>();
+}</div>
+      </div>
+      <div class="actions">
+        <button class="btn-ok" onclick="done(4)">✓ Listo</button>
+        <button class="btn-next" onclick="next(4)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 5 -->
+  <div class="step" id="s5">
+    <div class="step-header" onclick="toggle(5)">
+      <div class="num">5</div>
+      <div class="step-info">
+        <div class="step-title">Vista XML</div>
+        <div class="step-file">app/users/users-page.xml</div>
+      </div>
+      <span class="t-badge">~4 min</span>
+      <span class="chevron" id="ch5">›</span>
+    </div>
+    <div class="step-body" id="b5">
+      <div class="block">
+        <div class="block-label">Abra <code style="color:#60a5fa">app/users/users-page.xml</code> y reemplace con:</div>
+        <div class="code">&lt;Page navigatingTo=<span class="s">"onNavigatingTo"</span>
+      xmlns=<span class="s">"http://schemas.nativescript.org/tns.xsd"</span>&gt;
+
+    &lt;ActionBar title=<span class="s">"Users"</span> flat=<span class="s">"true"</span> /&gt;
+
+    &lt;GridLayout&gt;
+        &lt;ActivityIndicator
+            busy=<span class="s">"{{ isLoading }}"</span>
+            visibility=<span class="s">"{{ isLoading ? 'visible' : 'collapsed' }}"</span> /&gt;
+
+        &lt;Label
+            text=<span class="s">"{{ errorMessage }}"</span>
+            visibility=<span class="s">"{{ hasError ? 'visible' : 'collapsed' }}"</span>
+            class=<span class="s">"error-label"</span> /&gt;
+
+        &lt;ListView
+            items=<span class="s">"{{ users }}"</span>
+            visibility=<span class="s">"{{ !isLoading ? 'visible' : 'collapsed' }}"</span>&gt;
+            &lt;ListView.itemTemplate&gt;
+                &lt;StackLayout class=<span class="s">"user-item"</span>&gt;
+                    &lt;Label text=<span class="s">"{{ name }}"</span> class=<span class="s">"user-name"</span> /&gt;
+                    &lt;Label text=<span class="s">"{{ email }}"</span> class=<span class="s">"user-email"</span> /&gt;
+                    &lt;Label text=<span class="s">"{{ phone }}"</span> class=<span class="s">"user-phone"</span> /&gt;
+                &lt;/StackLayout&gt;
+            &lt;/ListView.itemTemplate&gt;
+        &lt;/ListView&gt;
+    &lt;/GridLayout&gt;
+
+&lt;/Page&gt;</div>
+      </div>
+      <div class="actions">
+        <button class="btn-ok" onclick="done(5)">✓ Listo</button>
+        <button class="btn-next" onclick="next(5)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 6 -->
+  <div class="step" id="s6">
+    <div class="step-header" onclick="toggle(6)">
+      <div class="num">6</div>
+      <div class="step-info">
+        <div class="step-title">Actualizar app-root y correr</div>
+        <div class="step-file">app/app-root.xml → ns run android</div>
+      </div>
+      <span class="t-badge">~2 min</span>
+      <span class="chevron" id="ch6">›</span>
+    </div>
+    <div class="step-body" id="b6">
+      <div class="block">
+        <div class="block-label">Abra <code style="color:#60a5fa">app/app-root.xml</code> y reemplácelo con:</div>
+        <div class="code">&lt;Frame defaultPage=<span class="s">"users/users-page"</span> /&gt;</div>
+      </div>
+      <div class="block">
+        <div class="block-label">Corra la app en el emulador o dispositivo</div>
+        <div class="cmd" onclick="copyCmd(this, 'ns run android')">
+          ns run android
+          <span class="cmd-copy">copiar</span>
+        </div>
+      </div>
+      <div class="block">
+        <div class="block-label">Resultado esperado</div>
+        <div class="note">La app muestra un spinner mientras carga, luego una lista con 10 usuarios de la API. Cada fila muestra nombre, email y teléfono.</div>
+      </div>
+      <div class="block">
+        <div class="block-label">Si tiene error de red</div>
+        <div class="warn">Asegúrese de que el emulador tiene acceso a internet. En dispositivo físico verifique que tiene WiFi activo.</div>
+      </div>
+      <div class="actions">
+        <button class="btn-ok" onclick="done(6)">✓ Listo</button>
+        <button class="btn-reset" onclick="reset(6)">Reiniciar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="final" id="final">
+    <h3>🎉 ¡Completado!</h3>
+    <p>Construyó una app NativeScript con patrón MVVM que consume una API REST real.</p>
+  </div>
+
+</main>
+
+<script>
+  const T = 7;
+  const st = Array(T).fill('p');
+
+  function toggle(i) {
+    const b = document.getElementById('b' + i);
+    const c = document.getElementById('ch' + i);
+    const open = b.classList.contains('open');
+    b.classList.toggle('open', !open);
+    c.style.transform = open ? '' : 'rotate(90deg)';
+  }
+
+  function done(i) {
+    st[i] = 'd';
+    const s = document.getElementById('s' + i);
+    s.classList.remove('active');
+    s.classList.add('done');
+    s.querySelector('.num').textContent = '✓';
+    upd();
+  }
+
+  function next(i) {
+    done(i);
+    document.getElementById('b' + i).classList.remove('open');
+    document.getElementById('ch' + i).style.transform = '';
+    const n = i + 1;
+    if (n < T) {
+      const ns = document.getElementById('s' + n);
+      ns.classList.add('active');
+      document.getElementById('b' + n).classList.add('open');
+      document.getElementById('ch' + n).style.transform = 'rotate(90deg)';
+      ns.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    upd();
+  }
+
+  function reset(i) {
+    st[i] = 'p';
+    const s = document.getElementById('s' + i);
+    s.classList.remove('done', 'active');
+    s.querySelector('.num').textContent = i;
+    upd();
+  }
+
+  function upd() {
+    const d = st.filter(x => x === 'd').length;
+    document.getElementById('prog-txt').textContent = d + ' / ' + T + ' pasos';
+    document.getElementById('prog').style.width = (d / T * 100) + '%';
+    if (d === T) {
+      document.getElementById('final').style.display = 'block';
+      document.getElementById('final').scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  function copyCmd(el, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = el.querySelector('.cmd-copy');
+      btn.textContent = '✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'copiar';
+        btn.classList.remove('copied');
+      }, 1500);
+    });
+  }
+
+  document.getElementById('b0').classList.add('open');
+  document.getElementById('ch0').style.transform = 'rotate(90deg)';
+</script>
+</body>
+</html>
